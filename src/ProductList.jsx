@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { addItem } from './CartSlice';
 import './ProductList.css';
 import CartItem from './CartItem';
@@ -8,8 +8,20 @@ import CartItem from './CartItem';
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false);
-    const [addedToCart, setAddedToCart] = useState({});
+
+    const CartItems = useSelector(state => state.cart.items);
     const dispatch = useDispatch();
+    const [addedToCart, setAddedToCart] = useState({});
+
+    // Calculate total quantity of plants in the cart
+    const calculateTotalQuantity = () => {
+        return CartItems
+            ? CartItems.reduce(
+                (total, item) => total + item.quantity,
+                0
+            )
+            : 0;
+    };
 
     const plantsArray = [
         {
@@ -74,7 +86,7 @@ function ProductList({ onHomeClick }) {
 
         dispatch(addItem(plant));
 
-        setAddedToCart((previous) => ({
+        setAddedToCart(previous => ({
             ...previous,
             [plant.name]: true
         }));
@@ -171,13 +183,17 @@ function ProductList({ onHomeClick }) {
                                 />
                             </svg>
                         </span>
+
+                        <span className="cart-quantity">
+                            {calculateTotalQuantity()}
+                        </span>
                     </a>
                 </div>
             </div>
 
             {!showCart ? (
                 <div className="product-grid">
-                    {plantsArray.map((category) => (
+                    {plantsArray.map(category => (
                         <section
                             className="category-section"
                             key={category.category}
